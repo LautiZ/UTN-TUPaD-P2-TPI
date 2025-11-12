@@ -1,16 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package entities;
 
 import entities.enums.Roles;
 import java.time.LocalDateTime;
 
-/**
- *
- * @author zullo
- */
+
 public class Usuario {
     private Integer id;
     private boolean eliminado;
@@ -21,14 +14,23 @@ public class Usuario {
     private Roles rol;
     private CredencialAcceso credencial;
 
-    public Usuario(Integer id, String username, String email, boolean activo, LocalDateTime fechaRegistro, String hashPassword, boolean requiereReset, Roles rol) {
+    public Usuario(Integer id, boolean eliminado, String username, String email, boolean activo, LocalDateTime fechaRegistro, Roles rol, CredencialAcceso credencial) {
         this.id = id;
+        this.eliminado = eliminado;
         this.username = username;
         this.email = email;
         this.activo = activo;
         this.fechaRegistro = fechaRegistro;
         this.rol = rol;
-        this.credencial = new CredencialAcceso(hashPassword, requiereReset);
+        this.credencial = credencial;
+    }
+
+    public Usuario(String username, String email, boolean activo, Roles rol, CredencialAcceso credencial) {
+        this.username = username;
+        this.email = email;
+        this.activo = activo;
+        this.rol = rol;
+        this.credencial = credencial;
     }
 
     public int getId() {
