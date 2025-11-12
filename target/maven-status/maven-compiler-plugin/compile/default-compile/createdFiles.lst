@@ -1,9 +1,12 @@
 config\DatabaseGenerator.class
+config\DatabaseSeeder.class
+services\Generic\GenericService.class
 com\mycompany\tpi\Tpi.class
 config\DatabaseConnection.class
 daos\CredencialAccesoDao.class
 daos\UsuarioDao.class
 entities\CredencialAcceso.class
+services\UsuarioService.class
 daos\Generic\GenericDao.class
 entities\Usuario.class
 entities\enums\Roles.class
