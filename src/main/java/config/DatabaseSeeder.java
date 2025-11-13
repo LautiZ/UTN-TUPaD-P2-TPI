@@ -20,11 +20,11 @@ public class DatabaseSeeder {
         String sqlUsuarios = """
             INSERT INTO Usuarios (username, email, eliminado, activo, rol, credencial_id)
             VALUES
-            ('ignacio', 'ignacio@example.com', FALSE, TRUE, 'ADMINISTRADOR', 1),
-            ('maria', 'maria@example.com', FALSE, TRUE, 'MODERADOR', 2),
-            ('juan', 'juan@example.com', FALSE, TRUE, 'USUARIO', 3),
-            ('sofia', 'sofia@example.com', FALSE, TRUE, 'USUARIO', 4),
-            ('carlos', 'carlos@example.com', FALSE, TRUE, 'MODERADOR', 5);
+            ('ignacio', 'ignacio@example.com', FALSE, TRUE, 'Administrador', 1),
+            ('maria', 'maria@example.com', FALSE, TRUE, 'Moderador', 2),
+            ('juan', 'juan@example.com', FALSE, TRUE, 'Usuario', 3),
+            ('sofia', 'sofia@example.com', FALSE, TRUE, 'Usuario', 4),
+            ('carlos', 'carlos@example.com', FALSE, TRUE, 'Moderador', 5);
         """;
 
         try (Connection conn = DatabaseConnection.getConnection();

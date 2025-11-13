@@ -6,6 +6,7 @@ import entities.CredencialAcceso;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import services.Generic.GenericService;
 import utils.PasswordUtils;
 
@@ -37,13 +38,34 @@ public class CredencialAccesoService implements GenericService<CredencialAcceso>
     }
 
     @Override
-    public CredencialAcceso actualizar(CredencialAcceso entidad) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public CredencialAcceso actualizar(Integer id, Map<String, Object> nuevosDatos) throws SQLException {
+        Connection conn = DatabaseConnection.getConnection();
+        CredencialAcceso ca = getById(id);
+        
+        for (Map.Entry<String, Object> entry : nuevosDatos.entrySet()) {
+            String clave = entry.getKey();
+            Object valor = entry.getValue();
+            
+            switch (clave) {
+                case "password" -> {
+                    String hashedPassword = PasswordUtils.hashPassword(valor.toString() + ca.getSalt());
+                    ca.setHashPassword(hashedPassword);
+                }
+                case "salt" -> ca.setSalt(valor.toString());
+                default -> {
+                }
+            }
+        }
+        return caDao.actualizar(ca, conn);
     }
 
     @Override
     public CredencialAcceso eliminar(Integer id) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            return caDao.eliminar(id, conn);
+        } catch (Exception e) {
+            throw new SQLException("Error eliminando la credencial con id: " + id, e);
+        }
     }
 
     @Override
@@ -57,13 +79,20 @@ public class CredencialAccesoService implements GenericService<CredencialAcceso>
 
     @Override
     public List<CredencialAcceso> getAll() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            return caDao.leerTodos(conn);
+        } catch (Exception e) {
+            throw new SQLException("Error obteniendo las credenciales." + e.getMessage());
+        }
     }
     
-    // Metodo sobrecargado para poder utlizar misma conexion que en usuarios
+    // Metodos sobrecargados para poder utlizar misma conexion que en usuarios
     public CredencialAcceso getById(Integer id, Connection conn) throws SQLException {
         return caDao.leer(id, conn);
     }
-
+    
+    public CredencialAcceso eliminar(Integer id, Connection conn) throws SQLException {
+        return caDao.eliminar(id, conn);
+    }
     
 }

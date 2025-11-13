@@ -8,6 +8,7 @@ import entities.enums.Roles;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import services.Generic.GenericService;
 
 
@@ -54,13 +55,44 @@ public class UsuarioService implements GenericService<Usuario>{
     }
 
     @Override
-    public Usuario actualizar(Usuario usuario) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Usuario actualizar(Integer id, Map<String, Object> nuevosDatos) throws SQLException {
+        Connection conn = DatabaseConnection.getConnection();
+        Usuario u = getById(id);
+        
+        for (Map.Entry<String, Object> entry : nuevosDatos.entrySet()) {
+            String clave = entry.getKey();
+            Object valor = entry.getValue();
+            
+            switch (clave) {
+                case "username" -> u.setUsername(valor.toString());
+                case "email" -> u.setEmail(valor.toString());
+                case "activo" -> u.setActivo((boolean) valor);
+                case "rol" -> u.setRol(Roles.fromNombre(valor.toString()));
+                default -> {
+                }
+            }
+        }
+        return usuarioDao.actualizar(u, conn);
     }
 
     @Override
     public Usuario eliminar(Integer id) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Connection conn = DatabaseConnection.getConnection();
+        try {
+            conn.setAutoCommit(false); // inicia transacción
+            
+            Usuario usuarioEliminado = usuarioDao.eliminar(id, conn);
+            
+            conn.commit(); // confirma
+            
+            return usuarioEliminado;
+        } catch (SQLException e) {
+            conn.rollback(); // deshace si hubo error en alguna de las creaciones
+            throw new SQLException(e.getMessage());
+        } finally {
+            conn.setAutoCommit(true);
+            conn.close();
+        }
     }
 
     @Override
@@ -75,7 +107,11 @@ public class UsuarioService implements GenericService<Usuario>{
 
     @Override
     public List<Usuario> getAll() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            return usuarioDao.leerTodos(conn);
+        } catch (Exception e) {
+            throw new SQLException("Error obteniendo los usuarios." + e.getMessage());
+        }
     }
     
 }

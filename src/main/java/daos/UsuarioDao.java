@@ -9,13 +9,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import services.CredencialAccesoService;
 
 
 public class UsuarioDao implements GenericDao<Usuario> {
     
-    private CredencialAccesoService cas = new CredencialAccesoService();
+    private final CredencialAccesoService cas = new CredencialAccesoService();
 
     @Override
     public Usuario crear(Usuario usuario, Connection conn) throws SQLException {
@@ -52,14 +53,16 @@ public class UsuarioDao implements GenericDao<Usuario> {
 
     @Override
     public Usuario leer(Integer id, Connection conn) throws SQLException {
-        String sql = "SELECT * FROM Usuarios WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        String instruccion = "SELECT * FROM Usuarios WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(instruccion)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                Roles rol = Roles.fromNombre(rs.getString("rol"));
-                CredencialAcceso ca = cas.getById(rs.getInt("credencial_id"), conn); // Usa metodo sobrecargado
-                return new Usuario(rs.getInt("id"), rs.getBoolean("eliminado"), rs.getString("username"), rs.getString("email"), rs.getBoolean("activo"), rs.getTimestamp("fecha_registro").toLocalDateTime(), rol, ca);
+                if (rs.getBoolean("eliminado") == false) {
+                    Roles rol = Roles.fromNombre(rs.getString("rol"));
+                    CredencialAcceso ca = cas.getById(rs.getInt("credencial_id"), conn); // Usa metodo sobrecargado
+                    return new Usuario(rs.getInt("id"), rs.getBoolean("eliminado"), rs.getString("username"), rs.getString("email"), rs.getBoolean("activo"), rs.getTimestamp("fecha_registro").toLocalDateTime(), rol, ca);
+                }
             }
         }
         return null;
@@ -67,17 +70,63 @@ public class UsuarioDao implements GenericDao<Usuario> {
 
     @Override
     public List<Usuario> leerTodos(Connection conn) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        String instruccion = "SELECT * FROM Usuarios";
+        List<Usuario> usuarios = new ArrayList<>();
+        
+        try (PreparedStatement ps = conn.prepareStatement(instruccion)) {
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                Usuario u = leer(rs.getInt("id"), conn);
+                if (u != null) {
+                    usuarios.add(u);
+                }
+            }
+        }
+
+        return usuarios;
     }
 
     @Override
-    public void actualizar(Usuario usuario, Connection conn) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Usuario actualizar(Usuario usuario, Connection conn) throws SQLException {
+        String instruccion = "UPDATE Usuarios SET username = ?, email = ?, activo = ?, rol = ? WHERE id = ?";
+        
+        try (PreparedStatement ps = conn.prepareStatement(instruccion, Statement.RETURN_GENERATED_KEYS)){
+            ps.setString(1, usuario.getUsername());
+            ps.setString(2, usuario.getEmail());
+            ps.setBoolean(3, usuario.isActivo());
+            ps.setString(4, usuario.getRol().getNombre());
+            ps.setInt(5, usuario.getId());
+            
+            int filasAfectadas = ps.executeUpdate();
+            
+            if (filasAfectadas == 0) {
+                throw new SQLException("No se pudo editar el usuario, no se afecto ninguna fila.");
+            }
+            
+            return leer(usuario.getId(), conn);
+        } catch (Exception e) {
+            throw new SQLException("Error al editar el usuario.");
+        }
     }
 
     @Override
-    public void eliminar(Integer id, Connection conn) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Usuario eliminar(Integer id, Connection conn) throws SQLException {
+        String instruccion = "UPDATE Usuarios SET eliminado = 1 WHERE id = ?";
+        Usuario u = leer(id, conn);
+        cas.eliminar(u.getCredencial().getId(), conn);
+        try (PreparedStatement ps = conn.prepareStatement(instruccion, Statement.RETURN_GENERATED_KEYS)){
+            ps.setInt(1, id);            
+            int filasAfectadas = ps.executeUpdate();
+            
+            if (filasAfectadas == 0) {
+                throw new SQLException("No se pudo eliminar el usuario, no se afecto ninguna fila.");
+            }
+            
+            return u;
+        } catch (Exception e) {
+            throw new SQLException("Error al eliminar el usuario.");
+        }
     }
     
 }

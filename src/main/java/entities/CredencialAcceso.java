@@ -89,4 +89,11 @@ public class CredencialAcceso {
                 "\nultimoCambio: " + ultimoCambio +
                 "\nrequiereReset: " + requiereReset;
     }
+    
+    public String toStringProtected() {
+        return "CredencialAcceso con id: " + id +
+                "\neliminado: " + eliminado +
+                "\nultimoCambio: " + ultimoCambio +
+                "\nrequiereReset: " + requiereReset;
+    }
 }

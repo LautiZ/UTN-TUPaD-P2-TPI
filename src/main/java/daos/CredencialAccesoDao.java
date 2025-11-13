@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -44,12 +45,14 @@ public class CredencialAccesoDao implements GenericDao<CredencialAcceso>{
 
     @Override
     public CredencialAcceso leer(Integer id, Connection conn) throws SQLException {
-        String sql = "SELECT * FROM CredencialAcceso WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        String instruccion = "SELECT * FROM CredencialAcceso WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(instruccion)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return new CredencialAcceso(rs.getInt("id"), rs.getBoolean("eliminado"), rs.getString("hashPassword"), rs.getString("salt"), rs.getTimestamp("ultimoCambio").toLocalDateTime(), rs.getBoolean("requiereReset"));
+                if (rs.getBoolean("eliminado") == false) {
+                    return new CredencialAcceso(rs.getInt("id"), rs.getBoolean("eliminado"), rs.getString("hashPassword"), rs.getString("salt"), rs.getTimestamp("ultimoCambio").toLocalDateTime(), rs.getBoolean("requiereReset"));
+                }
             }
         }
         return null;
@@ -57,17 +60,60 @@ public class CredencialAccesoDao implements GenericDao<CredencialAcceso>{
 
     @Override
     public List<CredencialAcceso> leerTodos(Connection conn) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        String instruccion = "SELECT * FROM CredencialAcceso";
+        List<CredencialAcceso> credenciales = new ArrayList<>();
+        
+        try (PreparedStatement ps = conn.prepareStatement(instruccion)) {
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                CredencialAcceso ca = leer(rs.getInt("id"), conn);
+                if (ca != null) {
+                    credenciales.add(ca);
+                }
+            }
+        }
+
+        return credenciales;
     }
 
     @Override
-    public void actualizar(CredencialAcceso ca, Connection conn) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public CredencialAcceso actualizar(CredencialAcceso ca, Connection conn) throws SQLException {
+        String instruccion = "UPDATE CredencialAcceso SET hashPassword = ?, salt = ?, requiereReset = 0 WHERE id = ?";
+        
+        try (PreparedStatement ps = conn.prepareStatement(instruccion, Statement.RETURN_GENERATED_KEYS)){
+            ps.setString(1, ca.getHashPassword());
+            ps.setString(2, ca.getSalt());
+            ps.setInt(3, ca.getId());
+            
+            int filasAfectadas = ps.executeUpdate();
+            
+            if (filasAfectadas == 0) {
+                throw new SQLException("No se pudo editar la credencial, no se afecto ninguna fila.");
+            }
+            
+            return leer(ca.getId(), conn);
+        } catch (Exception e) {
+            throw new SQLException("Error al editar la credencial." + e.getMessage());
+        }
     }
 
     @Override
-    public void eliminar(Integer id, Connection conn) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public CredencialAcceso eliminar(Integer id, Connection conn) throws SQLException {
+        String instruccion = "UPDATE CredencialAcceso SET eliminado = 1 WHERE id = ?";
+        CredencialAcceso ca = leer(id, conn);
+        try (PreparedStatement ps = conn.prepareStatement(instruccion, Statement.RETURN_GENERATED_KEYS)){
+            ps.setInt(1, id);            
+            int filasAfectadas = ps.executeUpdate();
+            
+            if (filasAfectadas == 0) {
+                throw new SQLException("No se pudo eliminar la credencial, no se afecto ninguna fila.");
+            }
+            
+            return ca;
+        } catch (Exception e) {
+            throw new SQLException("Error al eliminar la credencial.");
+        }
     }
     
 }
