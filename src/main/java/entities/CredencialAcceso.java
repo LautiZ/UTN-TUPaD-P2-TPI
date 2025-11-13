@@ -80,4 +80,13 @@ public class CredencialAcceso {
         this.requiereReset = requiereReset;
     }    
     
+    @Override
+    public String toString() {
+        return "CredencialAcceso con id: " + id +
+                "\neliminado: " + eliminado +
+                "\nhashPassword: '" + hashPassword + '\'' +
+                "\nsalt: '" + salt + '\'' +
+                "\nultimoCambio: " + ultimoCambio +
+                "\nrequiereReset: " + requiereReset;
+    }
 }
