@@ -10,9 +10,10 @@ public class CredencialAcceso {
     private String salt;
     private LocalDateTime ultimoCambio;
     private boolean requiereReset;
-
-    public CredencialAcceso(String hashPassword, boolean requiereReset) {
+    
+    public CredencialAcceso(String hashPassword, String salt, boolean requiereReset) {
         this.hashPassword = hashPassword;
+        this.salt = salt;
         this.requiereReset = requiereReset;
     }
 
@@ -80,4 +81,20 @@ public class CredencialAcceso {
         this.requiereReset = requiereReset;
     }    
     
+    @Override
+    public String toString() {
+        return "CredencialAcceso con id: " + id +
+                "\neliminado: " + eliminado +
+                "\nhashPassword: '" + hashPassword + '\'' +
+                "\nsalt: '" + salt + '\'' +
+                "\nultimoCambio: " + ultimoCambio +
+                "\nrequiereReset: " + requiereReset;
+    }
+    
+    public String toStringProtected() {
+        return "CredencialAcceso con id: " + id +
+                "\neliminado: " + eliminado +
+                "\nultimoCambio: " + ultimoCambio +
+                "\nrequiereReset: " + requiereReset;
+    }
 }

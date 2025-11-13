@@ -105,6 +105,29 @@ public class Usuario {
 
     public void setCredencial(CredencialAcceso credencial) {
         this.credencial = credencial;
-    }        
+    }
+    
+    @Override
+    public String toString() {
+        return "\nUsuario con id: " + id +
+               ",\neliminado: " + eliminado +
+               ",\nusername: '" + username + '\'' +
+               ",\nemail: '" + email + '\'' +
+               ",\nactivo: " + activo +
+               ",\nfechaRegistro: " + fechaRegistro +
+               ",\nrol: " + rol +
+               ",\n----------\n" + (credencial != null ? credencial.toString() : "null");
+    }
+    
+    public String toStringProtected() {
+        return "\nUsuario con id: " + id +
+               ",\neliminado: " + eliminado +
+               ",\nusername: '" + username + '\'' +
+               ",\nemail: '" + email + '\'' +
+               ",\nactivo: " + activo +
+               ",\nfechaRegistro: " + fechaRegistro +
+               ",\nrol: " + rol +
+               ",\n----------\n" + (credencial != null ? credencial.toStringProtected() : "null");
+    }
     
 }

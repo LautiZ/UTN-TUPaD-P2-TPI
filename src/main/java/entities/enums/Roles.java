@@ -20,5 +20,14 @@ public enum Roles {
     public String toString() {
         return nombre;
     }
+    
+    public static Roles fromNombre(String nombre) {
+        for (Roles rol : Roles.values()) {
+            if (rol.getNombre().equalsIgnoreCase(nombre)) {
+                return rol;
+            }
+        }
+        throw new IllegalArgumentException("Rol no válido: " + nombre);
+    }
 }
 
