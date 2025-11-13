@@ -183,7 +183,8 @@ public class Tpi {
             System.out.println("8. Mostrar todos los usuarios");
             System.out.println("9. Mostrar todas las credenciales que requieran reset");
             System.out.println("0. Salir");
-
+            
+            System.out.println("Ingrese la opcion que desee ejecutar: ");
             opcion = Integer.parseInt(input.nextLine());
             
             switch (opcion) {
