@@ -9,7 +9,7 @@ public class DatabaseConnection {
     // Datos de conexión (pueden extraerse de un archivo de configuración o variables de entorno)
     private static final String URL = "jdbc:mysql://localhost:3306/credencialesusuarios?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     private static final String USER = "root";
-    private static final String PASSWORD = "156149356";
+    private static final String PASSWORD = "";
 
     // Constructor privado para evitar instanciación
     private DatabaseConnection() {}
