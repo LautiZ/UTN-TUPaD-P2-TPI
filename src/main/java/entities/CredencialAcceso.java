@@ -10,9 +10,10 @@ public class CredencialAcceso {
     private String salt;
     private LocalDateTime ultimoCambio;
     private boolean requiereReset;
-
-    public CredencialAcceso(String hashPassword, boolean requiereReset) {
+    
+    public CredencialAcceso(String hashPassword, String salt, boolean requiereReset) {
         this.hashPassword = hashPassword;
+        this.salt = salt;
         this.requiereReset = requiereReset;
     }
 

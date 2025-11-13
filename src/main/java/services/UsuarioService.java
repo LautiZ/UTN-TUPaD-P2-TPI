@@ -14,17 +14,22 @@ import services.Generic.GenericService;
 
 public class UsuarioService implements GenericService<Usuario>{
     
-    private final UsuarioDao usuarioDao = new UsuarioDao();
+    private final UsuarioDao usuarioDao;
+    private final CredencialAccesoService credencialService;
+
+    public UsuarioService(UsuarioDao usuarioDao, CredencialAccesoService credService) {
+        this.usuarioDao = usuarioDao;
+        this.credencialService = credService;
+    }
     
-    public void CrearUsuarioConCredencial(String username, String email, String password, Roles rol) throws SQLException {
+    public void CrearUsuarioConCredencial(String username, String email, String password, String salt, Roles rol) throws SQLException {
         Connection conn = DatabaseConnection.getConnection();
         try {
             conn.setAutoCommit(false); // inicia transacción
             
             // Creacion de la credencial
-            CredencialAccesoService cas = new CredencialAccesoService();
-            CredencialAcceso ca = new CredencialAcceso(password, false);
-            CredencialAcceso caInsertada = cas.insertar(ca, conn);
+            CredencialAcceso ca = new CredencialAcceso(password, salt, false);
+            CredencialAcceso caInsertada = credencialService.insertar(ca, conn);
             
             // Creacion del usuario
             Usuario u = new Usuario(username, email, true, rol, caInsertada);

@@ -2,7 +2,9 @@ package services;
 
 import config.DatabaseConnection;
 import daos.CredencialAccesoDao;
+import daos.UsuarioDao;
 import entities.CredencialAcceso;
+import entities.Usuario;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -13,7 +15,14 @@ import utils.PasswordUtils;
 
 public class CredencialAccesoService implements GenericService<CredencialAcceso>{
     
-    private final CredencialAccesoDao caDao = new CredencialAccesoDao();
+    private final CredencialAccesoDao caDao;
+    private final UsuarioDao usuarioDao;
+
+
+    public CredencialAccesoService(CredencialAccesoDao caDao, UsuarioDao usuarioDao) {
+        this.caDao = caDao;
+        this.usuarioDao = usuarioDao;
+    }
 
     @Override
     public CredencialAcceso insertar(CredencialAcceso ca, Connection conn) throws SQLException {
@@ -62,9 +71,13 @@ public class CredencialAccesoService implements GenericService<CredencialAcceso>
     @Override
     public CredencialAcceso eliminar(Integer id) throws SQLException {
         try (Connection conn = DatabaseConnection.getConnection()) {
+            Usuario user = usuarioDao.buscarUsuarioPorCredencial(id, conn);
+            if (user != null) {
+                throw new SQLException("Hay un usuario asociado a esta credencial.");
+            }
             return caDao.eliminar(id, conn);
         } catch (Exception e) {
-            throw new SQLException("Error eliminando la credencial con id: " + id, e);
+            throw new SQLException("Error eliminando la credencial con id: " + id + " " + e.getMessage());
         }
     }
 

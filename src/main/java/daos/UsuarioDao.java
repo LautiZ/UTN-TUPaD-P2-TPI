@@ -11,12 +11,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import services.CredencialAccesoService;
 
 
 public class UsuarioDao implements GenericDao<Usuario> {
     
-    private final CredencialAccesoService cas = new CredencialAccesoService();
+    private final CredencialAccesoDao credDao;
+
+    public UsuarioDao(CredencialAccesoDao credDao) {
+        this.credDao = credDao;
+    }
 
     @Override
     public Usuario crear(Usuario usuario, Connection conn) throws SQLException {
@@ -60,7 +63,7 @@ public class UsuarioDao implements GenericDao<Usuario> {
             if (rs.next()) {
                 if (rs.getBoolean("eliminado") == false) {
                     Roles rol = Roles.fromNombre(rs.getString("rol"));
-                    CredencialAcceso ca = cas.getById(rs.getInt("credencial_id"), conn); // Usa metodo sobrecargado
+                    CredencialAcceso ca = credDao.leer(rs.getInt("credencial_id"), conn); // Usa metodo sobrecargado
                     return new Usuario(rs.getInt("id"), rs.getBoolean("eliminado"), rs.getString("username"), rs.getString("email"), rs.getBoolean("activo"), rs.getTimestamp("fecha_registro").toLocalDateTime(), rol, ca);
                 }
             }
@@ -114,7 +117,7 @@ public class UsuarioDao implements GenericDao<Usuario> {
     public Usuario eliminar(Integer id, Connection conn) throws SQLException {
         String instruccion = "UPDATE Usuarios SET eliminado = 1 WHERE id = ?";
         Usuario u = leer(id, conn);
-        cas.eliminar(u.getCredencial().getId(), conn);
+        credDao.eliminar(u.getCredencial().getId(), conn);
         try (PreparedStatement ps = conn.prepareStatement(instruccion, Statement.RETURN_GENERATED_KEYS)){
             ps.setInt(1, id);            
             int filasAfectadas = ps.executeUpdate();
@@ -127,6 +130,23 @@ public class UsuarioDao implements GenericDao<Usuario> {
         } catch (Exception e) {
             throw new SQLException("Error al eliminar el usuario.");
         }
+    }
+    
+    public Usuario buscarUsuarioPorCredencial(Integer credencialId, Connection conn) throws SQLException {
+        String instruccion = "SELECT * FROM Usuarios WHERE credencial_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(instruccion)) {
+            ps.setInt(1, credencialId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    if (rs.getBoolean("eliminado") == false) {
+                        Roles rol = Roles.fromNombre(rs.getString("rol"));
+                        CredencialAcceso ca = credDao.leer(rs.getInt("credencial_id"), conn); // Usa metodo sobrecargado
+                        return new Usuario(rs.getInt("id"), rs.getBoolean("eliminado"), rs.getString("username"), rs.getString("email"), rs.getBoolean("activo"), rs.getTimestamp("fecha_registro").toLocalDateTime(), rol, ca);
+                    }
+                }
+            }
+        }
+        return null;
     }
     
 }
