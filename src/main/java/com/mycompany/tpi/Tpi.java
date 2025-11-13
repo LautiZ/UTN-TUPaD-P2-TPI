@@ -51,13 +51,20 @@ public class Tpi {
         System.out.println("(default) Usuario, dejar vacio");
         System.out.println("1. Moderador");
         System.out.println("2. Administrador");
-        int opcionRol = Integer.parseInt(input.nextLine());
-        Roles rol = Roles.USUARIO;
+        String linea = input.nextLine();
+
+        int opcionRol;
+        if (linea.isBlank()) {  
+            opcionRol = 0; // valor por defecto
+        } else {
+            opcionRol = Integer.parseInt(linea);
+        }
+        
+        Roles rol;
         switch (opcionRol) {
             case 1 -> rol = Roles.MODERADOR;
             case 2 -> rol = Roles.ADMINISTRADOR;
-            default -> {
-        }
+            default -> rol = Roles.USUARIO;
         }
 
         usuarioService.CrearUsuarioConCredencial(username, email, password, salt, rol);
@@ -174,7 +181,7 @@ public class Tpi {
             System.out.println("6. Mostrar usuario por id");
             System.out.println("7. Mostrar credencial por id");
             System.out.println("8. Mostrar todos los usuarios");
-            System.out.println("9. Mostrar todas las credenciales");
+            System.out.println("9. Mostrar todas las credenciales que requieran reset");
             System.out.println("0. Salir");
 
             opcion = Integer.parseInt(input.nextLine());
