@@ -39,6 +39,8 @@ Una vez ejecutados los arhivos anteriores, es momento de pasar al nucleo de nues
 
 ## Enlace al video explicativo
 
+Youtube
+
 ```http
-  Youtube: https://youtu.be/GVJpN8M4ATk
+  https://youtu.be/GVJpN8M4ATk
 ```
